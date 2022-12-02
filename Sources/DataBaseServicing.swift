@@ -52,12 +52,12 @@ public extension DataBaseServicing {
       let all = try T.fetchAll(db)
       let keys = Set(all.map(compare))
 
-      let candidates = elements.filter { e in
+      let additions = elements.filter { e in
         !keys.contains(compare(e))
       }
 
-      for var record in candidates {
-        try record.save(db)
+      for var record in additions {
+        try record.insert(db)
       }
     }
   }
@@ -106,6 +106,59 @@ public extension DataBaseServicing {
     try await write { db in
       for var record in elements {
         try record.save(db)
+      }
+    }
+  }
+
+  @discardableResult
+  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
+    save(contentsOf: [element], compare: compare, copyPrimaryKey: copyPrimaryKey)
+  }
+
+  @discardableResult
+  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
+    Task {
+      try await save(contentsOf: elements, compare: compare, copyPrimaryKey: copyPrimaryKey)
+    }
+  }
+
+  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
+    try await save(contentsOf: [element], compare: compare, copyPrimaryKey: copyPrimaryKey)
+  }
+
+  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
+    try await write { db in
+      let all = try T.fetchAll(db)
+      let allKeys = Set(all.map(compare))
+
+      let additions = elements.filter { e in
+        !allKeys.contains(compare(e))
+      }
+
+      for var record in additions {
+        try record.insert(db)
+      }
+
+      let updates = elements.filter { e in
+        allKeys.contains(compare(e))
+      }
+      let updateKeys = Set(updates.map(compare))
+      let original = all.filter { e in
+        updateKeys.contains(compare(e))
+      }
+      let originalPairs = Dictionary(uniqueKeysWithValues: original.map { e in
+        (compare(e), e)
+      })
+
+      try updates.compactMap { e -> T? in
+        if let o = originalPairs[compare(e)] {
+          var ee = e
+          copyPrimaryKey(o, &ee)
+          return ee
+        }
+        return nil
+      }.forEach { record in
+        try record.update(db)
       }
     }
   }
