@@ -111,22 +111,22 @@ public extension DataBaseServicing {
   }
 
   @discardableResult
-  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
+  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ original: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
     save(contentsOf: [element], compare: compare, copyPrimaryKey: copyPrimaryKey)
   }
 
   @discardableResult
-  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
+  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ original: T, _ current: inout T) -> Void) -> Task<Void, Error> where T: MutablePersistableRecord & FetchableRecord {
     Task {
       try await save(contentsOf: elements, compare: compare, copyPrimaryKey: copyPrimaryKey)
     }
   }
 
-  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
+  func save<T>(_ element: T, compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ original: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
     try await save(contentsOf: [element], compare: compare, copyPrimaryKey: copyPrimaryKey)
   }
 
-  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ orignal: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
+  func save<T>(contentsOf elements: [T], compare: @escaping (T) -> some Hashable, copyPrimaryKey: @escaping (_ original: T, _ current: inout T) -> Void) async throws where T: MutablePersistableRecord & FetchableRecord {
     try await write { db in
       let all = try T.fetchAll(db)
       let allKeys = Set(all.map(compare))
