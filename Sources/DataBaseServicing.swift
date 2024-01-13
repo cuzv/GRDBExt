@@ -63,22 +63,22 @@ public extension DataBaseServicing {
   }
 
   @discardableResult
-  func update<T>(_ element: T) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func update(_ element: some MutablePersistableRecord) -> Task<Void, Error> {
     update(contentsOf: [element])
   }
 
   @discardableResult
-  func update<T>(contentsOf elements: [T]) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func update(contentsOf elements: [some MutablePersistableRecord]) -> Task<Void, Error> {
     Task {
       try await update(contentsOf: elements)
     }
   }
 
-  func update<T>(_ element: T) async throws where T: MutablePersistableRecord {
+  func update(_ element: some MutablePersistableRecord) async throws {
     try await update(contentsOf: [element])
   }
 
-  func update<T>(contentsOf elements: [T]) async throws where T: MutablePersistableRecord {
+  func update(contentsOf elements: [some MutablePersistableRecord]) async throws {
     try await write { db in
       for record in elements {
         try record.update(db)
@@ -87,22 +87,22 @@ public extension DataBaseServicing {
   }
 
   @discardableResult
-  func save<T>(_ element: T) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func save(_ element: some MutablePersistableRecord) -> Task<Void, Error> {
     save(contentsOf: [element])
   }
 
   @discardableResult
-  func save<T>(contentsOf elements: [T]) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func save(contentsOf elements: [some MutablePersistableRecord]) -> Task<Void, Error> {
     Task {
       try await save(contentsOf: elements)
     }
   }
 
-  func save<T>(_ element: T) async throws where T: MutablePersistableRecord {
+  func save(_ element: some MutablePersistableRecord) async throws {
     try await save(contentsOf: [element])
   }
 
-  func save<T>(contentsOf elements: [T]) async throws where T: MutablePersistableRecord {
+  func save(contentsOf elements: [some MutablePersistableRecord]) async throws {
     try await write { db in
       for var record in elements {
         try record.save(db)
@@ -164,22 +164,22 @@ public extension DataBaseServicing {
   }
 
   @discardableResult
-  func delete<T>(_ element: T) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func delete(_ element: some MutablePersistableRecord) -> Task<Void, Error> {
     delete(contentsOf: [element])
   }
 
   @discardableResult
-  func delete<T>(contentsOf elements: [T]) -> Task<Void, Error> where T: MutablePersistableRecord {
+  func delete(contentsOf elements: [some MutablePersistableRecord]) -> Task<Void, Error> {
     Task {
       try await delete(contentsOf: elements)
     }
   }
 
-  func delete<T>(_ element: T) async throws where T: MutablePersistableRecord {
+  func delete(_ element: some MutablePersistableRecord) async throws {
     try await delete(contentsOf: [element])
   }
 
-  func delete<T>(contentsOf elements: [T]) async throws where T: MutablePersistableRecord {
+  func delete(contentsOf elements: [some MutablePersistableRecord]) async throws {
     try await write { db in
       try elements.forEach { element in
         try element.delete(db)
@@ -189,7 +189,7 @@ public extension DataBaseServicing {
 
   func values<T>(of type: T.Type, orderings: SQLOrderingTerm? = nil) -> AsyncValueObservation<[T]> where T: TableRecord & FetchableRecord {
     var requset = T.all()
-    if let orderings = orderings {
+    if let orderings {
       requset = requset.order(orderings)
     }
     return values(for: requset)
@@ -203,7 +203,7 @@ public extension DataBaseServicing {
 
   func publisher<T>(of type: T.Type, orderings: SQLOrderingTerm? = nil) -> DatabasePublishers.Value<[T]> where T: TableRecord & FetchableRecord {
     var requset = T.all()
-    if let orderings = orderings {
+    if let orderings {
       requset = requset.order(orderings)
     }
     return publisher(for: requset)
