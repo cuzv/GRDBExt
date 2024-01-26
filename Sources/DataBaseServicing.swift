@@ -181,7 +181,7 @@ public extension DataBaseServicing {
 
   func delete(contentsOf elements: [some MutablePersistableRecord]) async throws {
     try await write { db in
-      try elements.forEach { element in
+      for element in elements {
         try element.delete(db)
       }
     }
