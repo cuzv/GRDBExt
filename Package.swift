@@ -6,10 +6,10 @@ import PackageDescription
 let package = Package(
   name: "GRDBExt",
   platforms: [
-    .iOS(.v11),
+    .iOS(.v12),
     .macOS(.v10_13),
-    .tvOS(.v11),
-    .watchOS(.v4),
+    .tvOS(.v12),
+    .watchOS(.v5),
   ],
   products: [
     .library(name: "GRDBExt", targets: ["GRDBExt"]),
